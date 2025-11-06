@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Roovo</string>
+    <string name="title_activity_main">Roovo</string>
+    <string name="package_name">com.roovo.app</string>
+    <string name="custom_url_scheme">com.roovo.app</string>
+</resources>
