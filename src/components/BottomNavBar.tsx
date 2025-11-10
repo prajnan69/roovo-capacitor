@@ -33,14 +33,18 @@ const navItems = (isLoggedIn: boolean): {
 
 interface BottomNavBarProps {
   show: boolean;
+  isChatOpen?: boolean;
   onSearchClick: () => void;
   openLogin: () => void;
+  onSwitchToHost?: () => void;
+  onSwitchToTraveling?: () => void;
 }
 
-const BottomNavBar: React.FC<BottomNavBarProps> = ({ show, onSearchClick, openLogin }) => {
+const BottomNavBar: React.FC<BottomNavBarProps> = ({ show, isChatOpen, onSearchClick, openLogin, onSwitchToHost, onSwitchToTraveling }) => {
   const { pathname, navigate } = useNavigation();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isHost, setIsHost] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -69,15 +73,43 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ show, onSearchClick, openLo
     }
   };
 
+  const isHostingPage = pathname.startsWith('/hosting');
   const navLinks = navItems(isLoggedIn);
 
-  if (isHost) {
-    navLinks.splice(2, 0, {
-      href: "/hosting",
-      label: "Hosting",
-      icon: FaExchangeAlt,
-      activeIcon: FaExchangeAlt,
-    });
+  if (isHost && !isHostingPage) {
+    if (!navLinks.find(item => item.label === 'Hosting')) {
+        navLinks.splice(2, 0, {
+            href: "/hosting",
+            label: "Hosting",
+            icon: FaExchangeAlt,
+            activeIcon: FaExchangeAlt,
+        });
+    }
+  }
+
+  if (isHostingPage) {
+    return (
+      <motion.footer
+        initial={{ y: 0 }}
+        animate={{ y: isChatOpen ? 100 : 0 }}
+        transition={{ ease: "easeInOut", duration: 0.3 }}
+        className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 rounded-full bg-white/5 backdrop-blur-lg border border-white/20 shadow-lg shadow-black/20 md:hidden"
+      >
+        <div className="h-16 flex items-center justify-center">
+          <button
+            onClick={() => {
+              if (onSwitchToTraveling) {
+                onSwitchToTraveling();
+              }
+            }}
+            className="text-black font-semibold px-6 h-full flex items-center gap-2"
+          >
+            <FaExchangeAlt />
+            <span>Switch to Traveling</span>
+          </button>
+        </div>
+      </motion.footer>
+    );
   }
 
   const variants = {
@@ -87,11 +119,13 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ show, onSearchClick, openLo
 
   return (
     <motion.footer
-      initial="visible"
+      initial="hidden"
       animate={show ? "visible" : "hidden"}
       variants={variants}
       transition={{ ease: "easeInOut", duration: 0.3 }}
       className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md rounded-3xl bg-white/5 backdrop-blur-lg border border-white/20 shadow-lg shadow-black/20 md:hidden"
+      style={{ width: isHostingPage ? 'auto' : '92%' }}
+      exit={{ y: "100%", opacity: 0 }}
     >
       <div
         className={`grid h-16 w-full items-center ${
@@ -150,6 +184,23 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ show, onSearchClick, openLo
               <button
                 key={item.href}
                 onClick={handleProfileClick}
+                className="relative w-full h-full flex items-center justify-center"
+              >
+                {content}
+              </button>
+            );
+          }
+
+          if (item.label === "Hosting") {
+            return (
+              <button
+                key={item.href}
+                onClick={() => {
+                  triggerHaptic();
+                  if (onSwitchToHost) {
+                    onSwitchToHost();
+                  }
+                }}
                 className="relative w-full h-full flex items-center justify-center"
               >
                 {content}

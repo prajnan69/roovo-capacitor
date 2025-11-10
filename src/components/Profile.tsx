@@ -3,10 +3,12 @@
 import { useState, useEffect, useRef } from 'react';
 import supabase from '@/services/api';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigation } from '@/hooks/useNavigation';
+import { usePreloadedData } from '@/context/PreloadContext';
 
 const Profile = () => {
-const navigate = useNavigate();
+  const { profileData, updateProfileData } = usePreloadedData();
+  const { navigate } = useNavigation();
   const [profile, setProfile] = useState({
     name: '',
     dob: '',
@@ -25,51 +27,20 @@ const [travelingProfilePictureFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        const { data } = await supabase
-          .from('users')
-          .select('name, dob, gender, address, email, phone')
-          .eq('id', session.user.id)
-          .single();
-
-        if (data) {
-          setProfile({
-            name: data.name || '',
-            dob: data.dob || '',
-            gender: data.gender || '',
-            address: data.address || '',
-            email: data.email || '',
-            phone: data.phone || '',
-            about: ''
-          });
-        }
-
-        const { data: listingData } = await supabase
-          .from('listings')
-          .select('host_profile_picture_url')
-          .eq('host_id', session.user.id)
-          .limit(1)
-          .single();
-
-        if (listingData) {
-          setHostProfilePicture(listingData.host_profile_picture_url);
-        }
-
-        const { data: kycData } = await supabase
-          .from('kyc')
-          .select('id')
-          .eq('user_id', session.user.id)
-          .single();
-
-        if (kycData) {
-          setKycVerified(true);
-        }
-      }
-    };
-    fetchProfile();
-  }, []);
+    if (profileData) {
+      setProfile({
+        name: profileData.name || '',
+        dob: profileData.dob || '',
+        gender: profileData.gender || '',
+        address: profileData.address || '',
+        email: profileData.email || '',
+        phone: profileData.phone || '',
+        about: profileData.about || ''
+      });
+      setHostProfilePicture(profileData.host_profile_picture_url);
+      setKycVerified(profileData.kyc_verified);
+    }
+  }, [profileData]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -81,7 +52,7 @@ const [travelingProfilePictureFile] = useState<File | null>(null);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    navigate('/');
+    window.location.href = "/";
   };
 
   const handleSaveProfile = async () => {
@@ -119,6 +90,13 @@ const [travelingProfilePictureFile] = useState<File | null>(null);
       if (error) {
         console.error('Error updating profile:', error);
       } else {
+        const updatedProfileData = {
+          ...profileData,
+          ...profile,
+          host_profile_picture_url: hostProfilePicture,
+          kyc_verified: kycVerified,
+        };
+        updateProfileData(updatedProfileData);
         setSaveStatus('Thank you!');
         setTimeout(() => {
           navigate('/hosting');

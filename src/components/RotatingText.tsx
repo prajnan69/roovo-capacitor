@@ -6,7 +6,7 @@ import {
   type VariantLabels,
   type Target,
   type TargetAndTransition
-} from 'framer-motion';
+} from 'motion/react';
 
 function cn(...classes: (string | undefined | null | boolean)[]): string {
   return classes.filter(Boolean).join(' ');
@@ -212,7 +212,7 @@ const RotatingText = forwardRef<RotatingTextRef, RotatingTextProps>(
                           array.reduce((sum, word) => sum + word.characters.length, 0)
                         )
                       }}
-                      className={cn('inline-block', elementLevelClassName)}
+                      className={cn('inline-block font-bold', elementLevelClassName)}
                     >
                       {char}
                     </motion.span>

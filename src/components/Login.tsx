@@ -54,8 +54,7 @@ export default function Login({
       if (error) throw error;
 
       onLoginSuccess();
-      if (redirectPath) setIsRedirecting(true);
-      else handleClose();
+      window.location.href = "/";
     } catch (err) {
       if (err instanceof Error) setError(err.message);
       else setError("Unexpected error occurred");

@@ -1,41 +1,22 @@
 "use client";
 
-import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import { Spinner } from './ui/shadcn-io/spinner';
-import { ChevronLeft } from 'lucide-react';
-
-const BackButton = ({ label, variant = 'default' }: { label?: string, variant?: 'default' | 'dark' }) => {
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-
-  const handleClick = () => {
-    setLoading(true);
-    navigate('/hosting');
-  };
-
-  const baseClasses = "text-white font-bold transition-colors flex items-center justify-center";
-  const variantClasses = {
-    default: "bg-gray-700 hover:bg-gray-600 rounded-lg py-2 px-4",
-    dark: "bg-black hover:bg-gray-800 rounded-lg hover:rounded-full w-10 h-10",
-  };
-
-  const displayContent = () => {
-    if (loading) {
-      return <Spinner />;
-    }
-    if (variant === 'dark') {
-      return <ChevronLeft className="h-6 w-6" />;
-    }
-    return label ?? 'Done';
-  };
-
+const BackButton = () => {
   return (
-    <button
-      className={`${baseClasses} ${variantClasses[variant]}`}
-      onClick={handleClick}
-    >
-      {displayContent()}
+    <button onClick={() => window.history.back()} className="z-10 text-black">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-6 w-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M15 19l-7-7 7-7"
+        />
+      </svg>
     </button>
   );
 };

@@ -20,5 +20,9 @@ export const useNavigation = () => {
     window.dispatchEvent(navEvent);
   };
 
-  return { pathname, navigate };
+  const back = () => {
+    window.history.back();
+  };
+
+  return { pathname, navigate, back };
 };

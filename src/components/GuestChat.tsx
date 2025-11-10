@@ -17,11 +17,13 @@ interface Message {
   status?: "sending" | "sent" | "failed";
 }
 
-interface GuestChatProps {
-  conversationId?: number;
-}
+import { useParams } from "react-router-dom";
 
-const GuestChat = ({ conversationId }: GuestChatProps) => {
+interface GuestChatProps {}
+
+const GuestChat = ({}: GuestChatProps) => {
+  const { id } = useParams();
+  const conversationId = id ? parseInt(id, 10) : undefined;
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [user, setUser] = useState<User | null>(null);
@@ -190,15 +192,12 @@ const GuestChat = ({ conversationId }: GuestChatProps) => {
     <div className="flex flex-col h-[calc(100vh-4rem)] bg-white text-black rounded-t-2xl overflow-hidden md:rounded-lg md:h-[calc(100vh-10rem)]">
       {/* Top header only visible on mobile */}
       <div className="md:hidden sticky top-0 bg-white/90 backdrop-blur-md z-10 border-b border-gray-200 flex items-center px-4 py-3">
-        <h1 className="text-lg font-semibold text-gray-900 flex-1">{guestName}</h1>
+        <div className="text-lg font-semibold text-gray-900 flex-1">{guestName}</div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 px-3 sm:px-4 py-2 overflow-y-auto scrollbar-hide flex flex-col-reverse">
-        <div ref={messagesEndRef} />
+      <div className="flex-1 px-3 sm:px-4 py-2 overflow-y-auto scrollbar-hide">
         {Array.from(new Map(messages.map((msg) => [msg.id, msg])).values())
-          .slice()
-          .reverse()
           .map((msg) => (
             <motion.div
               key={msg.id}
@@ -220,6 +219,7 @@ const GuestChat = ({ conversationId }: GuestChatProps) => {
               )}
             </motion.div>
           ))}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input (sticky with safe-area for iOS notch) */}

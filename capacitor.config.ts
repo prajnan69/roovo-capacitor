@@ -3,7 +3,18 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'com.roovo.app',
   appName: 'Roovo',
-  webDir: 'dist'
+  webDir: 'dist',
+  android: {
+    adjustMarginsForEdgeToEdge: 'auto' // or 'force' or 'disable'
+  },
+  plugins: {
+  LiveUpdate: {
+    appId: '94f0b6fd-9585-427d-839f-c09989a1ceaf',
+    serverDomain: 'roovo-backend.fly.dev',
+    defaultChannel: 'testing',
+    readyTimeout: 10000
+  },
+},
 };
 
 export default config;

@@ -1,34 +1,80 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import HostHeader from "./HostHeader";
-import ActionCard from "./ActionCard";
-import Reservations from "./Reservations";
+import Calendar from "../Calendar";
+import Messages from "./Messages";
+import ManageListings from "./ManageListings";
+import Bookings from "./Bookings";
+import Payouts from "./Payouts";
+import { useNavigation } from "@/hooks/useNavigation";
+import supabase, { fetchConversationsByHostId } from "../../services/api";
 
-const HostDashboard = () => {
+interface HostDashboardProps {
+  conversations: any[];
+  selectedConversation: any;
+  onConversationSelect: (conversation: any) => void;
+}
+
+const HostDashboard: React.FC<HostDashboardProps> = ({ conversations, selectedConversation, onConversationSelect }) => {
+  const { pathname } = useNavigation();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollPosition = useRef(0);
+
+  useEffect(() => {
+    const scrollable = scrollRef.current;
+    if (scrollable) {
+      const handleScroll = () => {
+        scrollPosition.current = scrollable.scrollLeft;
+      };
+      scrollable.addEventListener("scroll", handleScroll);
+      return () => {
+        scrollable.removeEventListener("scroll", handleScroll);
+      };
+    }
+  }, []);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollLeft = scrollPosition.current;
+    }
+  }, [pathname]);
+
+  const renderContent = () => {
+    if (pathname === "/hosting/calendar") {
+      return <Calendar />;
+    }
+    if (pathname === "/hosting/messages") {
+      return <Messages conversations={conversations} selectedConversation={selectedConversation} onConversationSelect={onConversationSelect} />;
+    }
+    if (pathname === "/hosting/listings") {
+      return <ManageListings />;
+    }
+    if (pathname === "/hosting/bookings") {
+      return <Bookings />;
+    }
+    if (pathname === "/hosting/payouts") {
+      return <Payouts />;
+    }
+    return <Calendar />;
+  };
+
   return (
-    <div className="min-h-screen bg-white">
-      <HostHeader />
-      <main className="p-8">
+    <div className="h-screen flex flex-col">
+      {!selectedConversation && <HostHeader scrollRef={scrollRef as React.RefObject<HTMLDivElement>} />}
+      <AnimatePresence mode="wait">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeInOut" }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8"
+          key={pathname}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="flex-grow overflow-y-auto"
         >
-          <ActionCard
-            title="Add a payout method"
-            description="Required to get paid"
-            icon="/icons/payout.png"
-          />
-          <ActionCard
-            title="Add your account information"
-            description="Required to get paid"
-            icon="/icons/account.png"
-          />
+          {renderContent()}
         </motion.div>
-        <Reservations />
-      </main>
+      </AnimatePresence>
     </div>
   );
 };

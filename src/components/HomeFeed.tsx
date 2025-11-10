@@ -6,15 +6,17 @@ import { API_BASE_URL } from '@/services/api';
 import { SkeletonCard } from './SkeletonCard';
 import MobileSearchBar from './MobileSearchBar';
 import type { ListingData as Listing } from '@/types';
+import { Spinner } from '@/components/ui/shadcn-io/spinner';
 import supabase from '@/services/api';
 import { triggerHaptic } from '@/lib/haptics';
 
 
 // --- Main HomeFeed Component ---
-const HomeFeed: React.FC = () => {
+const HomeFeed: React.FC<{ onSwitchToHost?: () => void }> = ({ onSwitchToHost }) => {
   const [listings, setListings] = useState<Listing[]>([]);
   const [recentlyViewed, setRecentlyViewed] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [popularTitle, setPopularTitle] = useState('Popular homes in Karnataka');
@@ -65,7 +67,10 @@ rating: listing.overall_rating || (Math.random() * (5.0 - 4.2) + 4.2).toFixed(1)
         setError("We couldn't load the listings. Please try again later.");
       } finally {
         // Add a small delay to prevent jarring loading flashes
-        setTimeout(() => setLoading(false), 1000);
+        setTimeout(() => {
+          setLoading(false);
+          setIsInitialLoad(false);
+        }, 1000);
       }
     };
 
@@ -109,10 +114,18 @@ rating: listing.overall_rating || (Math.random() * (5.0 - 4.2) + 4.2).toFixed(1)
 
   // --- Conditional Rendering Logic ---
   const renderContent = () => {
+    if (isInitialLoad) {
+      return (
+        <div className="flex items-center justify-center h-screen">
+          <Spinner />
+        </div>
+      );
+    }
+
     if (loading) {
       return (
         <div className="bg-white p-4">
-        <div className="flex flex-col space-y-12">
+        <div className="flex flex-col space-y-6">
           <ListingSection title="Popular homes" listings={[]} loading={true} />
           <ListingSection title="Available this weekend" listings={[]} loading={true} />
           <ListingSection title="New homes on Roovo" listings={[]} loading={true} />
@@ -139,7 +152,7 @@ rating: listing.overall_rating || (Math.random() * (5.0 - 4.2) + 4.2).toFixed(1)
 
     // --- Render the sections with actual data ---
     return (
-      <div className="flex flex-col space-y-12">
+      <div className="flex flex-col space-y-6">
         {recentlyViewed.length > 0 && <ListingSection title="You recently viewed" listings={recentlyViewed} loading={false} size="small" />}
         {popularHomes.length > 0 && <ListingSection title={popularTitle} listings={popularHomes} loading={false} />}
         {weekendHomes.length > 0 && <ListingSection title="Available this weekend" listings={weekendHomes} loading={false} />}

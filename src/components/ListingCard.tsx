@@ -19,11 +19,11 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing, isMobile, size = 'no
   const [isBadgeHovered, setIsBadgeHovered] = useState(false);
   const isGuestFavourite = listing.overall_rating && listing.overall_rating > 4.8;
   const displayLocation = listing.location?.city || 'Location unavailable';
-  const images = (listing.all_image_urls || []).slice(0, 5).map((src, index) => {
+  const images = (listing.all_image_urls || []).slice(0, size === 'small' ? 1 : 5).map((src, index) => {
     return { id: index, img: src.url };
   });
 
-  const cardWidth = size === 'small' ? 160 : (isMobile ? 192 : 224);
+  const cardWidth = size === 'small' || isMobile ? 160 : 224;
 
   const navigate = (path: string) => {
     window.history.pushState({}, '', path);
@@ -35,7 +35,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing, isMobile, size = 'no
     // Card container: Smaller width, flex-shrink-0 to prevent squishing
     <div
       onClick={() => navigate(`/listing/${listing.id}`)}
-      className={`cursor-pointer ${size === 'small' ? 'w-40' : (isMobile ? 'w-48' : 'w-56')} flex-shrink-0 isolate`}
+      className={`cursor-pointer ${size === 'small' || isMobile ? 'w-40' : 'w-56'} flex-shrink-0 isolate`}
     >
       {/* --- Image Carousel --- */}
       <div className="relative rounded-2xl aspect-square group">
@@ -75,7 +75,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing, isMobile, size = 'no
 
       {/* --- Listing Info --- */}
       <div className="mt-2">
-        <h3 className={`font-medium ${size === 'small' ? 'text-xs' : 'text-sm'} text-slate-800`}>{listing.title}</h3>
+        {size !== 'small' && <h3 className="font-medium text-sm text-slate-800">{listing.title}</h3>}
         <p className="text-xs text-slate-500 mt-1">{displayLocation}</p>
         <div className="text-xs text-slate-500 flex items-center space-x-1 mt-1">
             <span>
@@ -94,7 +94,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing, isMobile, size = 'no
 
 // --- Skeleton Card for Loading State ---
 export const SkeletonCard: React.FC<{ isMobile?: boolean, size?: 'small' | 'normal' }> = ({ isMobile, size = 'normal' }) => (
-  <div className={`animate-pulse ${size === 'small' ? 'w-40' : (isMobile ? 'w-48' : 'w-56')} flex-shrink-0`}>
+  <div className={`animate-pulse ${size === 'small' || isMobile ? 'w-40' : 'w-56'} flex-shrink-0`}>
     <div className="bg-slate-200 rounded-2xl aspect-square"></div>
     <div className="mt-2 space-y-2">
       <div className="h-3 bg-slate-200 rounded w-5/6"></div>

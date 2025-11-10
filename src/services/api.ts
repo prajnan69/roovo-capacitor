@@ -47,6 +47,18 @@ export const getListingsByHostId = async (hostId: string) => {
   return result.data;
 };
 
+export const getListingsWithBookingsByHostId = async (hostId: string) => {
+  console.log(`Fetching listings with bookings for host ID: ${hostId}`);
+  const response = await fetch(`${API_BASE_URL}/api/listings/host/${hostId}/with-bookings`);
+  if (!response.ok) {
+    console.error('Failed to fetch listings with bookings by host ID:', response.status, response.statusText);
+    throw new Error('Failed to fetch listings with bookings by host ID');
+  }
+  const result = await response.json();
+  console.log('Listings with bookings data:', result.data);
+  return result.data;
+};
+
 export const fetchBookings = async (listingId?: string) => {
   let url = `${API_BASE_URL}/api/bookings`;
   if (listingId) {
@@ -55,6 +67,22 @@ export const fetchBookings = async (listingId?: string) => {
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error('Failed to fetch bookings');
+  }
+  return response.json();
+};
+
+export const fetchConversationsByHostId = async (hostId: string) => {
+  const response = await fetch(`${API_BASE_URL}/api/chat/conversations/${hostId}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch conversations');
+  }
+  return response.json();
+};
+
+export const fetchPayoutsByHostId = async (hostId: string) => {
+  const response = await fetch(`${API_BASE_URL}/api/payouts/${hostId}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch payouts');
   }
   return response.json();
 };
